@@ -8,10 +8,12 @@ namespace WebApplication1.Controllers;
 public class WeatherForecastController : ControllerBase
 {
     private ILoggerManager _logger;
+    private readonly IRepositoryManager _repository;
 
-    public WeatherForecastController(ILoggerManager logger)
+    public WeatherForecastController(ILoggerManager logger, IRepositoryManager repository)
     {
         _logger = logger;
+        _repository = repository;
     }
 
     [HttpGet]
@@ -21,6 +23,10 @@ public class WeatherForecastController : ControllerBase
         _logger.LogDebug("Here is the Debug message from our values controller.");
         _logger.LogWarn("Here is the Warn message from our values controller.");
         _logger.LogError("Here is the Error message from our values controller.");
+        
+        //_repository.Company.anymethod();
+        //_repository.Employee.anymethod();
+        
         return new string[] { "value1", "value2" };
     }
 }

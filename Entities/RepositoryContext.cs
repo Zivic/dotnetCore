@@ -1,3 +1,4 @@
+using Entities.Configuration;
 using Entities.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,6 +10,14 @@ public class RepositoryContext : DbContext
         :base(options)
     {
     }
+
+    //DB Seeding
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfiguration(new CompanyConfiguration());
+        modelBuilder.ApplyConfiguration(new EmployeeConfiguration());
+    }
+    
     public DbSet<Company> Companies { get; set; }
     public DbSet<Employee> Employees { get; set; }
 }
