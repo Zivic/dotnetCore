@@ -1,0 +1,42 @@
+﻿using Contracts;
+using Entities.DataTransferObjects;
+using Entities.Models;
+using Microsoft.AspNetCore.Mvc;
+
+namespace WebApplication1;
+
+[Route("api/companies")]
+[ApiController]
+public class CompaniesController : ControllerBase
+{
+    private readonly ILoggerManager _logger;
+    private readonly IRepositoryManager _repository;
+
+    public CompaniesController(IRepositoryManager repository, ILoggerManager logger)
+    {
+        _repository = repository;
+        _logger = logger;
+    }
+
+    [HttpGet]
+    public IActionResult GetCompanies()
+    {
+        try
+        {
+            var companies = _repository.Company.GetAllCompanies(trackChanges: false);
+            var companiesDto = companies.Select(c => new CompanyDTO
+            {
+                Id =  c.Id,
+                Name = c.Name,
+                FullAddress = string.Join(' ', c.Address, c.Country)
+            }).ToList();
+            
+            return Ok(companiesDto);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Something went wrong in the {nameof(GetCompanies)} method: {e.Message}");
+            return StatusCode(500);
+        }
+    }   
+}
