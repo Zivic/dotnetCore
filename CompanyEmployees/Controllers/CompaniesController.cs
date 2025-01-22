@@ -24,9 +24,7 @@ public class CompaniesController : ControllerBase
     [HttpGet]
     public IActionResult GetCompanies()
     {
-        try
-        {
-            
+        //throw new Exception("Exception");
             var companies = _repository.Company.GetAllCompanies(trackChanges: false);
             /* //old version, before mapper
             var companiesDto = companies.Select(c => new CompanyDTO
@@ -38,11 +36,5 @@ public class CompaniesController : ControllerBase
             */
             var companiesDto = _mapper.Map<IEnumerable<CompanyDTO>>(companies);
             return Ok(companiesDto);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError($"Something went wrong in the {nameof(GetCompanies)} method: {e.Message}");
-            return StatusCode(500);
-        }
     }   
 }

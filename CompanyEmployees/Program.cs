@@ -1,3 +1,4 @@
+using Contracts;
 using NLog;
 using WebApplication1.Extensions;
 
@@ -25,7 +26,9 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-
+//modern way to pass arg into the old Configure function
+var logger = app.Services.GetRequiredService<ILoggerManager>();
+app.ConfigureExceptionHandler(logger);
 
 app.UseCors();
 app.UseHttpsRedirection();
