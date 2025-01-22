@@ -13,5 +13,6 @@ public class MappingProfile : Profile
                 c.FullAddress,
             opt =>
                 opt.MapFrom(x => x.Address + ' ' + x.Country));
+        CreateMap<Employee, EmployeeDTO>();
     }
 }
