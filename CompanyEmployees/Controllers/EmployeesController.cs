@@ -33,4 +33,23 @@ public class EmployeesController : ControllerBase
         var employeesDto = _mapper.Map<IEnumerable<EmployeeDTO>>(employeesFromDb);
         return Ok(employeesDto);
     }
+
+    [HttpGet("{id}")]
+    public IActionResult GetEmployeeForCompany(Guid companyId, Guid id)
+    {
+        var company = _repository.Company.GetCompany(companyId, trackChanges: false);
+        if (company == null)
+        {
+            _logger.LogInfo($"Company {companyId} does not exist in the database.");
+            return NotFound();
+        }
+        var employeeFromDb = _repository.Employee.GetEmployee(id: id, companyId: companyId, trackChanges: false);
+        if (employeeFromDb == null)
+        {
+            _logger.LogInfo($"Employee {id} does not exist in the database.");
+            return NotFound();
+        }
+        var employeeDto = _mapper.Map<EmployeeDTO>(employeeFromDb);
+        return Ok(employeeDto);
+    }
 }
