@@ -3,6 +3,7 @@ using Entities;
 using LoggerService;
 using Microsoft.EntityFrameworkCore;
 using Repository;
+using WebApplication1.Formatters;
 
 namespace WebApplication1.Extensions;
 
@@ -29,4 +30,8 @@ public static class ServiceExtensions
     
     public static void ConfigureRepositoryManager(this IServiceCollection services) =>
         services.AddScoped<IRepositoryManager, RepositoryManager>();
+
+    public static IMvcBuilder AddCustomCSVFormatter(this IMvcBuilder builder) =>
+        builder.AddMvcOptions(config =>
+            config.OutputFormatters.Add(new CsvOutputFormatter()));
 }

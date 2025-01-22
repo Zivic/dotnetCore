@@ -27,14 +27,14 @@ public class CompaniesController : ControllerBase
         //throw new Exception("Exception");
             var companies = _repository.Company.GetAllCompanies(trackChanges: false);
             /* //old version, before mapper
-            var companiesDto = companies.Select(c => new CompanyDTO
+            var companiesDto = companies.Select(c => new CompanyDto
             {
                 Id =  c.Id,
                 Name = c.Name,
                 FullAddress = string.Join(' ', c.Address, c.Country)
             }).ToList();
             */
-            var companiesDto = _mapper.Map<IEnumerable<CompanyDTO>>(companies);
+            var companiesDto = _mapper.Map<IEnumerable<CompanyDto>>(companies);
             return Ok(companiesDto);
     }
 
@@ -51,7 +51,7 @@ public class CompaniesController : ControllerBase
         }
         else
         {
-            var companyDto = _mapper.Map<CompanyDTO>(company);
+            var companyDto = _mapper.Map<CompanyDto>(company);
             return Ok(companyDto);
         }
     }

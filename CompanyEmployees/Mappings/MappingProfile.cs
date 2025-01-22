@@ -8,11 +8,11 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        CreateMap<Company, CompanyDTO>() //source, destination
+        CreateMap<Company, CompanyDto>() //source, destination
             .ForMember(c => //additional mapping rule for the FullAddress
                 c.FullAddress,
             opt =>
                 opt.MapFrom(x => x.Address + ' ' + x.Country));
-        CreateMap<Employee, EmployeeDTO>();
+        CreateMap<Employee, EmployeeDto>();
     }
 }

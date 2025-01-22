@@ -17,7 +17,15 @@ builder.Services.ConfigureLoggerService();
 builder.Services.ConfigureSqlContext(builder.Configuration);//Configuration ?
 builder.Services.ConfigureRepositoryManager();
 builder.Services.AddAutoMapper(typeof(Program)); //Startup ?
-builder.Services.AddControllers();
+
+//allow content negotiation (xml response)
+builder.Services.AddControllers(config =>
+{
+    config.RespectBrowserAcceptHeader = true;
+    config.ReturnHttpNotAcceptable = true;
+})
+    .AddXmlDataContractSerializerFormatters()
+    .AddCustomCSVFormatter();
 
 var app = builder.Build();
 

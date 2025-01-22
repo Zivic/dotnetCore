@@ -30,7 +30,7 @@ public class EmployeesController : ControllerBase
             return NotFound();
         }
         var employeesFromDb = _repository.Employee.GetEmployees(companyId, trackChanges: false);
-        var employeesDto = _mapper.Map<IEnumerable<EmployeeDTO>>(employeesFromDb);
+        var employeesDto = _mapper.Map<IEnumerable<EmployeeDto>>(employeesFromDb);
         return Ok(employeesDto);
     }
 
@@ -49,7 +49,7 @@ public class EmployeesController : ControllerBase
             _logger.LogInfo($"Employee {id} does not exist in the database.");
             return NotFound();
         }
-        var employeeDto = _mapper.Map<EmployeeDTO>(employeeFromDb);
+        var employeeDto = _mapper.Map<EmployeeDto>(employeeFromDb);
         return Ok(employeeDto);
     }
 }
