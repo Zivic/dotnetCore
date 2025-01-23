@@ -3,6 +3,7 @@ using Contracts;
 using Entities.DataTransferObjects;
 using Entities.Models;
 using Microsoft.AspNetCore.Mvc;
+using WebApplication1.ModelBinders;
 
 namespace WebApplication1;
 
@@ -39,7 +40,7 @@ public class CompaniesController : ControllerBase
     }
 
     //TODO: it throws a format error when you don't have the exact number of characters instead of a 404, and doesn't even enter the function
-    [HttpGet("{id}")]
+    [HttpGet("{id}", Name = "CompanyById")]
     public IActionResult GetCompany(Guid id)
     {
         Console.WriteLine("[GetCompany] Received request. ");
@@ -54,5 +55,63 @@ public class CompaniesController : ControllerBase
             var companyDto = _mapper.Map<CompanyDto>(company);
             return Ok(companyDto);
         }
+    }
+
+    [HttpPost]
+    public IActionResult CreateCompany([FromBody] CompanyForCreationDto company)
+    {
+        if (company == null)
+        {
+            _logger.LogError("CompanyForCreationDto object sent from the client is null.");
+            return BadRequest("CompanyForCreationDto object is null.");
+        }
+
+        var companyEntity = _mapper.Map<Company>(company);
+        _repository.Company.CreateCompany(companyEntity);
+        _repository.Save();
+
+        var companyToReturn = _mapper.Map<CompanyDto>(companyEntity);
+        return CreatedAtRoute("CompanyById", new { id = companyToReturn.Id }, companyToReturn);
+    }
+
+    [HttpGet("collection/({ids})", Name = "CompanyCollection")]
+    public IActionResult GetCompanyCollection([ModelBinder(BinderType = typeof(ArrayModelBinder))]IEnumerable<Guid> ids)
+    {
+        if (ids == null)
+        {
+            _logger.LogError("Parameter ids sent from the client is null.");
+            return BadRequest("Parameter ids is null.");
+        }
+        var companyEntities = _repository.Company.GetByIds(ids, trackChanges: false);
+        if (ids.Count() != companyEntities.Count())
+        {
+            _logger.LogError("Some ids are invalid in a collection.");
+            return NotFound();
+        }
+
+        var companiesToReturn = _mapper.Map<IEnumerable<CompanyDto>>(companyEntities);
+        return Ok(companiesToReturn);
+    }
+
+    //TODO: fix - "field employee is required"
+    [HttpPost("collection")]
+    public IActionResult CreateCompanyCollection([FromBody] IEnumerable<CompanyForCreationDto> companyCollection)
+    {
+        if (companyCollection == null)
+        {
+            _logger.LogError("Parameter companyCollection sent from the client is null.");
+            return BadRequest();
+        }
+
+        var companyEntities = _mapper.Map<IEnumerable<Company>>(companyCollection);
+        foreach (var company in companyEntities)
+        {
+            _repository.Company.CreateCompany(company);
+        }
+        _repository.Save();
+
+        var companyCollectionToReturn = _mapper.Map<IEnumerable<CompanyDto>>(companyEntities);
+        var ids = string.Join(',', companyCollectionToReturn.Select(e => e.Id));
+        return CreatedAtRoute("CompanyCollection", new {ids}, companyCollectionToReturn);
     }
 }
