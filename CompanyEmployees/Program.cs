@@ -22,7 +22,12 @@ builder.Services.AddControllers(config =>
 {
     config.RespectBrowserAcceptHeader = true;
     config.ReturnHttpNotAcceptable = true;
-}).AddNewtonsoftJson()
+})
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.SuppressModelStateInvalidFilter = true;
+    })
+    .AddNewtonsoftJson()
     .AddXmlDataContractSerializerFormatters()
     .AddCustomCSVFormatter();
 

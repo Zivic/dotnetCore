@@ -1,8 +1,7 @@
-﻿namespace Entities.DataTransferObjects;
+﻿using System.ComponentModel.DataAnnotations;
 
-public class EmployeeForUpdateDto
+namespace Entities.DataTransferObjects;
+
+public class EmployeeForUpdateDto : EmployeeForCreationDto
 {
-    public string Name { get; set; }
-    public int Age { get; set; }
-    public string Position { get; set; }
 }

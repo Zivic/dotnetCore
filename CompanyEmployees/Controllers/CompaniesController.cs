@@ -66,6 +66,12 @@ public class CompaniesController : ControllerBase
             return BadRequest("CompanyForCreationDto object is null.");
         }
 
+        if (!ModelState.IsValid)
+        {
+            _logger.LogError("Invalid model state for CompanyForCreationDto.");
+            return UnprocessableEntity(ModelState);
+        }
+        
         var companyEntity = _mapper.Map<Company>(company);
         _repository.Company.CreateCompany(companyEntity);
         _repository.Save();
@@ -103,6 +109,12 @@ public class CompaniesController : ControllerBase
             return BadRequest();
         }
 
+        if (!ModelState.IsValid)
+        {
+            _logger.LogError("Invalid model state for CompanyForCreationDto.");
+            return UnprocessableEntity(ModelState);
+        }
+
         var companyEntities = _mapper.Map<IEnumerable<Company>>(companyCollection);
         foreach (var company in companyEntities)
         {
@@ -137,6 +149,13 @@ public class CompaniesController : ControllerBase
             _logger.LogError("CompanyForUpdateDto object sent from the client is null.");
             return BadRequest();
         }
+        
+        if (!ModelState.IsValid)
+        {
+            _logger.LogError("Invalid model state for the CompanyForUpdateDto object");
+            return UnprocessableEntity(ModelState);
+        }
+        
         var companyEntity = _repository.Company.GetCompany(id, trackChanges: true);
         if (companyEntity == null)
         {
