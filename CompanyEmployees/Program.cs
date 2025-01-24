@@ -17,13 +17,12 @@ builder.Services.ConfigureLoggerService();
 builder.Services.ConfigureSqlContext(builder.Configuration);//Configuration ?
 builder.Services.ConfigureRepositoryManager();
 builder.Services.AddAutoMapper(typeof(Program)); //Startup ?
-
 //allow content negotiation (xml response)
 builder.Services.AddControllers(config =>
 {
     config.RespectBrowserAcceptHeader = true;
     config.ReturnHttpNotAcceptable = true;
-})
+}).AddNewtonsoftJson()
     .AddXmlDataContractSerializerFormatters()
     .AddCustomCSVFormatter();
 
