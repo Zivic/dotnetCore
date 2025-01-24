@@ -75,4 +75,51 @@ public class EmployeesController : ControllerBase
         var employeeToReturn = _mapper.Map<EmployeeDto>(employeeEntity);
         return CreatedAtRoute("GetEmployeeForCompany", new { companyId, id = employeeToReturn.Id }, employeeToReturn);
     }
+
+    [HttpDelete("{id}")]
+    public IActionResult DeleteEmployeeForCompany(Guid companyId, Guid id)
+    {
+        var company = _repository.Company.GetCompany(companyId, trackChanges: false);
+        if (company == null)
+        {
+            _logger.LogInfo($"Company with id {companyId} does not exist in the database.");
+            return NotFound();
+        }
+        var employee = _repository.Employee.GetEmployee(companyId: companyId, id: id,  trackChanges: false);
+        if (employee == null)
+        {
+            _logger.LogInfo($"Employee {id} does not exist in the database.");
+            return NotFound();
+        }
+        _repository.Employee.DeleteEmployee(employee);
+        _repository.Save();
+        return NoContent();
+    }
+
+    [HttpPut("{id}")]
+    public IActionResult UpdateEmployeeForCompany(Guid companyId, Guid id, [FromBody] EmployeeForUpdateDto employee)
+    {
+        if (employee == null)
+        {
+            _logger.LogError("EmployeeForUpdateDto object sent from the client is null.");
+            return BadRequest("EmployeeForUpdateDto object is null.");
+        }
+        
+        var company = _repository.Company.GetCompany(companyId, trackChanges: false);
+        if (company == null)
+        {
+            _logger.LogInfo($"Company with id {companyId} does not exist in the database.");
+            return NotFound();
+        }
+        var employeeEntity = _repository.Employee.GetEmployee(id: id, companyId: companyId, trackChanges: true);
+        if (employeeEntity == null)
+        {
+            _logger.LogInfo($"Employee {id} does not exist in the database.");
+            return NotFound();
+        }
+
+       _mapper.Map(employee, employeeEntity);
+       _repository.Save();
+       return NoContent();
+    }
 }
