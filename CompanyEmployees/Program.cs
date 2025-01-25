@@ -1,4 +1,6 @@
+using Contracts;
 using NLog;
+using WebApplication1.ActionFilters;
 using WebApplication1.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,7 +17,23 @@ builder.Services.ConfigureCors();
 builder.Services.ConfigureLoggerService();
 builder.Services.ConfigureSqlContext(builder.Configuration);//Configuration ?
 builder.Services.ConfigureRepositoryManager();
-builder.Services.AddControllers();
+builder.Services.AddAutoMapper(typeof(Program)); //Startup ?
+builder.Services.AddScoped<ValidationFilterAttribute>();
+builder.Services.AddScoped<ValidateCompanyExistsAttribute>();
+builder.Services.AddScoped<ValidateEmployeeForCompanyExistsAttribute>();
+//allow content negotiation (xml response)
+builder.Services.AddControllers(config =>
+{
+    config.RespectBrowserAcceptHeader = true;
+    config.ReturnHttpNotAcceptable = true;
+})
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.SuppressModelStateInvalidFilter = true;
+    })
+    .AddNewtonsoftJson()
+    .AddXmlDataContractSerializerFormatters()
+    .AddCustomCSVFormatter();
 
 var app = builder.Build();
 
@@ -24,7 +42,9 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-
+//modern way to pass arg into the old Configure function
+var logger = app.Services.GetRequiredService<ILoggerManager>();
+app.ConfigureExceptionHandler(logger);
 
 app.UseCors();
 app.UseHttpsRedirection();
