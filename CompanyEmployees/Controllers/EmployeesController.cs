@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.ActionFilters;
 using Entities.RequestFeatures;
+using Newtonsoft.Json;
 
 namespace WebApplication1.Controllers;
 [Route("api/companies/{companyId}/employees")]
@@ -33,6 +34,8 @@ public class EmployeesController : ControllerBase
             return NotFound();
         }
         var employeesFromDb = await _repository.Employee.GetEmployeesAsync(companyId, employeeParameters, trackChanges: false);
+        Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(employeesFromDb.MetaData));
+        
         var employeesDto = _mapper.Map<IEnumerable<EmployeeDto>>(employeesFromDb);
         return Ok(employeesDto);
     }
