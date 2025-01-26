@@ -5,6 +5,7 @@ using Entities.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.ActionFilters;
+using Entities.RequestFeatures;
 
 namespace WebApplication1.Controllers;
 [Route("api/companies/{companyId}/employees")]
@@ -23,7 +24,7 @@ public class EmployeesController : ControllerBase
     }
     
     [HttpGet]
-    public async Task<IActionResult> GetEmployeesForCompany(Guid companyId)
+    public async Task<IActionResult> GetEmployeesForCompany(Guid companyId, [FromQuery]EmployeeParameters employeeParameters)
     {
         var company = await _repository.Company.GetCompanyAsync(companyId, trackChanges: false);
         if (company == null)
@@ -31,7 +32,7 @@ public class EmployeesController : ControllerBase
             _logger.LogInfo($"Company {companyId} does not exist in the database.");
             return NotFound();
         }
-        var employeesFromDb = await _repository.Employee.GetEmployeesAsync(companyId, trackChanges: false);
+        var employeesFromDb = await _repository.Employee.GetEmployeesAsync(companyId, employeeParameters, trackChanges: false);
         var employeesDto = _mapper.Map<IEnumerable<EmployeeDto>>(employeesFromDb);
         return Ok(employeesDto);
     }
