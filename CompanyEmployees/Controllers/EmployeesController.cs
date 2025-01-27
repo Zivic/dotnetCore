@@ -16,12 +16,14 @@ public class EmployeesController : ControllerBase
     private readonly ILoggerManager _logger;
     private readonly IRepositoryManager _repository;
     private readonly IMapper _mapper;
+    private readonly IDataShaper<EmployeeDto> _dataShaper;
 
-    public EmployeesController(IRepositoryManager repository, ILoggerManager logger, IMapper mapper)
+    public EmployeesController(IRepositoryManager repository, ILoggerManager logger, IMapper mapper, IDataShaper<EmployeeDto> dataShaper)
     {
         _repository = repository;
-        _logger = logger;
+        _logger = logger;   
         _mapper = mapper;
+        _dataShaper = dataShaper;
     }
     
     [HttpGet]
@@ -40,7 +42,7 @@ public class EmployeesController : ControllerBase
         Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(employeesFromDb.MetaData));
         
         var employeesDto = _mapper.Map<IEnumerable<EmployeeDto>>(employeesFromDb);
-        return Ok(employeesDto);
+        return Ok(_dataShaper.ShapeData(employeesDto, employeeParameters.Fields));
     }
 
     [HttpGet("{id}", Name = "GetEmployeeForCompany")]

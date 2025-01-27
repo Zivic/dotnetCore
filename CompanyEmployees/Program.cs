@@ -1,5 +1,7 @@
 using Contracts;
+using Entities.DataTransferObjects;
 using NLog;
+using Repository.DataShaping;
 using WebApplication1.ActionFilters;
 using WebApplication1.Extensions;
 
@@ -21,6 +23,14 @@ builder.Services.AddAutoMapper(typeof(Program)); //Startup ?
 builder.Services.AddScoped<ValidationFilterAttribute>();
 builder.Services.AddScoped<ValidateCompanyExistsAttribute>();
 builder.Services.AddScoped<ValidateEmployeeForCompanyExistsAttribute>();
+
+/*
+ * Registers the IDataShaper interface with the DataShaper implementation.
+ * When IDataShaper<EmployeeDto> is requested via dependency injection,
+ * an instance of DataShaper<EmployeeDto> will be provided
+ */
+builder.Services.AddScoped<IDataShaper<EmployeeDto>,DataShaper<EmployeeDto>>();
+
 //allow content negotiation (xml response)
 builder.Services.AddControllers(config =>
 {
