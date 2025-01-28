@@ -11,13 +11,13 @@ public interface IDataShaper<T>
     /// <param name="entities">The collection of entities</param>
     /// <param name="fieldString">The string containing the fields requested by the client</param>
     /// <returns></returns>
-    IEnumerable<Entity> ShapeData(IEnumerable<T> entities, string fieldString);
+    IEnumerable<ShapedEntity> ShapeData(IEnumerable<T> entities, string fieldString);
     /// <summary>
     /// Method for a single entity
     /// </summary>
     /// <param name="entity">The entity</param>
     /// <param name="fieldString">The string containing the fields requested by the client</param>
     /// <returns></returns>
-    Entity ShapeData(T entity, string fieldString);
+    ShapedEntity ShapeData(T entity, string fieldString);
 
 }
