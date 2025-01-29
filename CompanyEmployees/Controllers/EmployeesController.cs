@@ -5,6 +5,9 @@ using Entities.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.ActionFilters;
+using Entities.RequestFeatures;
+using Newtonsoft.Json;
+using WebApplication1.Utility;
 
 namespace WebApplication1.Controllers;
 [Route("api/companies/{companyId}/employees")]
@@ -14,26 +17,38 @@ public class EmployeesController : ControllerBase
     private readonly ILoggerManager _logger;
     private readonly IRepositoryManager _repository;
     private readonly IMapper _mapper;
+    private readonly EmployeeLinks _employeeLinks;
 
-    public EmployeesController(IRepositoryManager repository, ILoggerManager logger, IMapper mapper)
+    public EmployeesController(IRepositoryManager repository, ILoggerManager logger, IMapper mapper, 
+        EmployeeLinks employeeLinks)
     {
         _repository = repository;
-        _logger = logger;
+        _logger = logger;   
         _mapper = mapper;
+        _employeeLinks = employeeLinks;
     }
     
     [HttpGet]
-    public async Task<IActionResult> GetEmployeesForCompany(Guid companyId)
+    [ServiceFilter<ValidateMediaTypeAttribute>]
+    public async Task<IActionResult> GetEmployeesForCompany(Guid companyId, [FromQuery]EmployeeParameters employeeParameters)
     {
+        if(!employeeParameters.ValidAgeRange)
+            return BadRequest("Max age can't be less than min age.");
+        
         var company = await _repository.Company.GetCompanyAsync(companyId, trackChanges: false);
         if (company == null)
         {
             _logger.LogInfo($"Company {companyId} does not exist in the database.");
             return NotFound();
         }
-        var employeesFromDb = await _repository.Employee.GetEmployeesAsync(companyId, trackChanges: false);
+        var employeesFromDb = await _repository.Employee.GetEmployeesAsync(companyId, employeeParameters, trackChanges: false);
+        Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(employeesFromDb.MetaData));
+        
         var employeesDto = _mapper.Map<IEnumerable<EmployeeDto>>(employeesFromDb);
-        return Ok(employeesDto);
+        
+        var links = _employeeLinks.TryGenerateLinks(employeesDto,
+            employeeParameters.Fields, companyId, HttpContext);
+        return links.HasLinks ? Ok(links.LinkedEntities) : Ok(links.ShapedEntities);
     }
 
     [HttpGet("{id}", Name = "GetEmployeeForCompany")]

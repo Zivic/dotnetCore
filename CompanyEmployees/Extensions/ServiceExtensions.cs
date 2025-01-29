@@ -1,6 +1,8 @@
 using Contracts;
 using Entities;
 using LoggerService;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Repository;
 using WebApplication1.Formatters;
@@ -34,4 +36,35 @@ public static class ServiceExtensions
     public static IMvcBuilder AddCustomCSVFormatter(this IMvcBuilder builder) =>
         builder.AddMvcOptions(config =>
             config.OutputFormatters.Add(new CsvOutputFormatter()));
+    
+    /// <summary>
+    /// Adds support for custom Accept header media types, required to support HATEOAS. <br/>
+    /// Supported media types include: <br/>
+    /// application/vnd.djole.hateoas+json <br/>
+    /// application/vnd.djole.hateoas+xml
+    /// </summary>
+    /// <param name="services"></param>
+    public static void AddCustomMediaTypes(this IServiceCollection services)
+    {
+        services.Configure<MvcOptions>(config =>
+        {
+            var newtonsoftJsonOutputFormatter = config.OutputFormatters
+                .OfType<NewtonsoftJsonOutputFormatter>()?.FirstOrDefault();
+            if (newtonsoftJsonOutputFormatter != null)
+            {
+                newtonsoftJsonOutputFormatter
+                    .SupportedMediaTypes
+                    .Add("application/vnd.djole.hateoas+json");
+            }
+            var xmlOutputFormatter = config.OutputFormatters
+                .OfType<XmlDataContractSerializerOutputFormatter>()?.FirstOrDefault();
+            if (xmlOutputFormatter != null)
+            {
+                xmlOutputFormatter
+                    .SupportedMediaTypes
+                    .Add("application/vnd.djole.hateoas+xml");
+            }
+        });
+    }
+
 }
