@@ -1,4 +1,5 @@
 using Asp.Versioning;
+using AspNetCoreRateLimit;
 using Contracts;
 using Entities.DataTransferObjects;
 using Microsoft.AspNetCore.Mvc;
@@ -23,6 +24,11 @@ builder.Services.ConfigureLoggerService();
 builder.Services.ConfigureVersioning();
 builder.Services.ConfigureResponseCaching();
 builder.Services.ConfigureHttpCacheHeaders();
+
+builder.Services.AddMemoryCache();
+builder.Services.ConfigureRateLimitingOptions();
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.ConfigureSqlContext(builder.Configuration);//Configuration ?
 builder.Services.ConfigureRepositoryManager();
 builder.Services.AddAutoMapper(typeof(Program)); //Startup ?
@@ -75,8 +81,9 @@ app.UseHttpsRedirection();
 app.MapControllers();
 app.UseResponseCaching();
 app.UseHttpCacheHeaders();
+app.UseIpRateLimiting();
 
-//do we need this?
+//Generally add things to the request pipeline before UseRouting
 app.UseRouting();
 app.UseAuthorization();
 //app.UseEndpoints(endpoints => endpoints.MapControllers());
