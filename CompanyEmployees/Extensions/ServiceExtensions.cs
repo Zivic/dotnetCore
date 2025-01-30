@@ -38,10 +38,12 @@ public static class ServiceExtensions
             config.OutputFormatters.Add(new CsvOutputFormatter()));
     
     /// <summary>
-    /// Adds support for custom Accept header media types, required to support HATEOAS. <br/>
+    /// Adds support for custom Accept header media types, required to support HATEOAS and apiRoot. <br/>
     /// Supported media types include: <br/>
     /// application/vnd.djole.hateoas+json <br/>
-    /// application/vnd.djole.hateoas+xml
+    /// application/vnd.djole.apiroot+json <br/>
+    /// application/vnd.djole.hateoas+xml <br/>
+    /// application/vnd.djole.apiroot+xml 
     /// </summary>
     /// <param name="services"></param>
     public static void AddCustomMediaTypes(this IServiceCollection services)
@@ -55,6 +57,9 @@ public static class ServiceExtensions
                 newtonsoftJsonOutputFormatter
                     .SupportedMediaTypes
                     .Add("application/vnd.djole.hateoas+json");
+                newtonsoftJsonOutputFormatter
+                    .SupportedMediaTypes
+                    .Add("application/vnd.djole.apiroot+json");
             }
             var xmlOutputFormatter = config.OutputFormatters
                 .OfType<XmlDataContractSerializerOutputFormatter>()?.FirstOrDefault();
@@ -63,6 +68,9 @@ public static class ServiceExtensions
                 xmlOutputFormatter
                     .SupportedMediaTypes
                     .Add("application/vnd.djole.hateoas+xml");
+                xmlOutputFormatter
+                    .SupportedMediaTypes
+                    .Add("application/vnd.djole.apiroot+xml");
             }
         });
     }

@@ -22,8 +22,15 @@ public class CompaniesController : ControllerBase
         _logger = logger;
         _mapper = mapper;
     }
+    
+    [HttpOptions]
+    public IActionResult GetCompaniesOptions()
+    {
+        Response.Headers.Append("Allow", "GET, OPTIONS, POST");
+        return Ok();
+    }
 
-    [HttpGet]
+    [HttpGet(Name = "GetCompanies")]
     public async Task<IActionResult> GetCompanies()
     {
         //throw new Exception("Exception");
@@ -58,7 +65,7 @@ public class CompaniesController : ControllerBase
         }
     }
 
-    [HttpPost]
+    [HttpPost(Name = "CreateCompany")]
     [ServiceFilter<ValidationFilterAttribute>]
     public async Task<IActionResult> CreateCompany([FromBody] CompanyForCreationDto company)
     {
