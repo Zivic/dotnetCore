@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using AutoMapper;
 using Contracts;
 using Entities.DataTransferObjects;
 using Entities.Models;
@@ -8,7 +9,8 @@ using WebApplication1.ModelBinders;
 
 namespace WebApplication1;
 
-[Route("api/companies")]
+[ApiVersion("1.0")]
+[Route("api/v{v:apiversion}/companies")]
 [ApiController]
 public class CompaniesController : ControllerBase
 {

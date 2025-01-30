@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using Contracts;
 using Entities.DataTransferObjects;
 using NLog;
@@ -18,6 +19,7 @@ LogManager.Setup().LoadConfigurationFromFile(string.Concat(Directory.GetCurrentD
 builder.Services.AddOpenApi();
 builder.Services.ConfigureCors();
 builder.Services.ConfigureLoggerService();
+builder.Services.ConfigureVersioning();
 builder.Services.ConfigureSqlContext(builder.Configuration);//Configuration ?
 builder.Services.ConfigureRepositoryManager();
 builder.Services.AddAutoMapper(typeof(Program)); //Startup ?

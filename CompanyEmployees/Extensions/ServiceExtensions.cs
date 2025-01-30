@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using Contracts;
 using Entities;
 using LoggerService;
@@ -72,6 +73,16 @@ public static class ServiceExtensions
                     .SupportedMediaTypes
                     .Add("application/vnd.djole.apiroot+xml");
             }
+        });
+    }
+
+    public static void ConfigureVersioning(this IServiceCollection services)
+    {
+        services.AddApiVersioning(opt =>
+        {
+            opt.ReportApiVersions = true;
+            opt.AssumeDefaultVersionWhenUnspecified = true;
+            opt.DefaultApiVersion = new ApiVersion(1, 0);
         });
     }
 
