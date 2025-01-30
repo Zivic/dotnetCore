@@ -2,6 +2,7 @@ using Asp.Versioning;
 using Contracts;
 using Entities;
 using LoggerService;
+using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
@@ -15,12 +16,8 @@ public static class ServiceExtensions
     public static void ConfigureCors(this IServiceCollection services) =>
         services.AddCors(options =>
         {
-            options.AddPolicy("CorsPolicy", builder =>
-            {
-                builder.AllowAnyOrigin()
-                    .AllowAnyMethod()
-                    .AllowAnyHeader();
-            });
+            options.AddPolicy("CorsPolicy",
+                builder => { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); });
         });
 
     public static void ConfigureLoggerService(this IServiceCollection services) =>
@@ -28,16 +25,15 @@ public static class ServiceExtensions
 
     public static void ConfigureSqlContext(this IServiceCollection services, IConfiguration configuration) =>
         services.AddDbContext<RepositoryContext>(opts =>
-            opts.UseSqlServer(configuration.GetConnectionString("sqlConnection"), b =>
-                b.MigrationsAssembly("CompanyEmployees")));
-    
+            opts.UseSqlServer(configuration.GetConnectionString("sqlConnection"),
+                b => b.MigrationsAssembly("CompanyEmployees")));
+
     public static void ConfigureRepositoryManager(this IServiceCollection services) =>
         services.AddScoped<IRepositoryManager, RepositoryManager>();
 
     public static IMvcBuilder AddCustomCSVFormatter(this IMvcBuilder builder) =>
-        builder.AddMvcOptions(config =>
-            config.OutputFormatters.Add(new CsvOutputFormatter()));
-    
+        builder.AddMvcOptions(config => config.OutputFormatters.Add(new CsvOutputFormatter()));
+
     /// <summary>
     /// Adds support for custom Accept header media types, required to support HATEOAS and apiRoot. <br/>
     /// Supported media types include: <br/>
@@ -52,26 +48,20 @@ public static class ServiceExtensions
         services.Configure<MvcOptions>(config =>
         {
             var newtonsoftJsonOutputFormatter = config.OutputFormatters
-                .OfType<NewtonsoftJsonOutputFormatter>()?.FirstOrDefault();
+                .OfType<NewtonsoftJsonOutputFormatter>()
+                ?.FirstOrDefault();
             if (newtonsoftJsonOutputFormatter != null)
             {
-                newtonsoftJsonOutputFormatter
-                    .SupportedMediaTypes
-                    .Add("application/vnd.djole.hateoas+json");
-                newtonsoftJsonOutputFormatter
-                    .SupportedMediaTypes
-                    .Add("application/vnd.djole.apiroot+json");
+                newtonsoftJsonOutputFormatter.SupportedMediaTypes.Add("application/vnd.djole.hateoas+json");
+                newtonsoftJsonOutputFormatter.SupportedMediaTypes.Add("application/vnd.djole.apiroot+json");
             }
-            var xmlOutputFormatter = config.OutputFormatters
-                .OfType<XmlDataContractSerializerOutputFormatter>()?.FirstOrDefault();
+
+            var xmlOutputFormatter = config.OutputFormatters.OfType<XmlDataContractSerializerOutputFormatter>()
+                ?.FirstOrDefault();
             if (xmlOutputFormatter != null)
             {
-                xmlOutputFormatter
-                    .SupportedMediaTypes
-                    .Add("application/vnd.djole.hateoas+xml");
-                xmlOutputFormatter
-                    .SupportedMediaTypes
-                    .Add("application/vnd.djole.apiroot+xml");
+                xmlOutputFormatter.SupportedMediaTypes.Add("application/vnd.djole.hateoas+xml");
+                xmlOutputFormatter.SupportedMediaTypes.Add("application/vnd.djole.apiroot+xml");
             }
         });
     }
@@ -86,4 +76,12 @@ public static class ServiceExtensions
         });
     }
 
+    public static void ConfigureResponseCaching(this IServiceCollection services) => services.AddResponseCaching();
+
+    public static void ConfigureHttpCacheHeaders(this IServiceCollection services) =>
+        services.AddHttpCacheHeaders((expirationOpt) =>
+        {
+            expirationOpt.MaxAge = 65;
+            expirationOpt.CacheLocation = CacheLocation.Private;
+        }, (validationOpt) => { validationOpt.MustRevalidate = true; });
 }

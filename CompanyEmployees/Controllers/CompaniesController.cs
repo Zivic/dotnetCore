@@ -3,6 +3,7 @@ using AutoMapper;
 using Contracts;
 using Entities.DataTransferObjects;
 using Entities.Models;
+using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.ActionFilters;
 using WebApplication1.ModelBinders;
@@ -10,8 +11,9 @@ using WebApplication1.ModelBinders;
 namespace WebApplication1;
 
 [ApiVersion("1.0")]
-[Route("api/v{v:apiversion}/companies")]
+[Route("api/v1/companies")]
 [ApiController]
+/*[ResponseCache(CacheProfileName = "120SecondsDuration")]*/
 public class CompaniesController : ControllerBase
 {
     private readonly ILoggerManager _logger;
@@ -51,6 +53,8 @@ public class CompaniesController : ControllerBase
 
     //TODO: it throws a format error when you don't have the exact number of characters instead of a 404, and doesn't even enter the function
     [HttpGet("{id}", Name = "CompanyById")]
+    [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 60)]
+    [HttpCacheValidation(MustRevalidate = false)]
     public async Task<IActionResult> GetCompany(Guid id)
     {
         Console.WriteLine("[GetCompany] Received request. ");

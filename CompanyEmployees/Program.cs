@@ -1,6 +1,7 @@
 using Asp.Versioning;
 using Contracts;
 using Entities.DataTransferObjects;
+using Microsoft.AspNetCore.Mvc;
 using NLog;
 using Repository.DataShaping;
 using WebApplication1.ActionFilters;
@@ -20,6 +21,8 @@ builder.Services.AddOpenApi();
 builder.Services.ConfigureCors();
 builder.Services.ConfigureLoggerService();
 builder.Services.ConfigureVersioning();
+builder.Services.ConfigureResponseCaching();
+builder.Services.ConfigureHttpCacheHeaders();
 builder.Services.ConfigureSqlContext(builder.Configuration);//Configuration ?
 builder.Services.ConfigureRepositoryManager();
 builder.Services.AddAutoMapper(typeof(Program)); //Startup ?
@@ -41,6 +44,10 @@ builder.Services.AddControllers(config =>
 {
     config.RespectBrowserAcceptHeader = true;
     config.ReturnHttpNotAcceptable = true;
+    config.CacheProfiles.Add("120SecondsDuration", new CacheProfile
+    {
+        Duration = 120
+    });
 })
     .ConfigureApiBehaviorOptions(options =>
     {
@@ -66,6 +73,8 @@ app.ConfigureExceptionHandler(logger);
 app.UseCors();
 app.UseHttpsRedirection();
 app.MapControllers();
+app.UseResponseCaching();
+app.UseHttpCacheHeaders();
 
 //do we need this?
 app.UseRouting();
