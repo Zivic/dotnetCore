@@ -25,6 +25,11 @@ builder.Services.ConfigureVersioning();
 builder.Services.ConfigureResponseCaching();
 builder.Services.ConfigureHttpCacheHeaders();
 
+builder.Services.AddAuthentication();
+builder.Services.ConfigureIdentity();
+builder.Services.ConfigureJWT(builder.Configuration);
+builder.Services.AddScoped<IAuthenticationManager, AuthenticationManager>();
+
 builder.Services.AddMemoryCache();
 builder.Services.ConfigureRateLimitingOptions();
 builder.Services.AddHttpContextAccessor();
@@ -85,6 +90,7 @@ app.UseIpRateLimiting();
 
 //Generally add things to the request pipeline before UseRouting
 app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
 //app.UseEndpoints(endpoints => endpoints.MapControllers());
 

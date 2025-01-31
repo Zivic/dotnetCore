@@ -10,13 +10,13 @@ public class MappingProfile : Profile
     {
         CreateMap<Company, CompanyDto>() //source, destination
             .ForMember(c => //additional mapping rule for the FullAddress
-                c.FullAddress,
-            opt =>
+                c.FullAddress, opt =>
                 opt.MapFrom(x => x.Address + ' ' + x.Country));
         CreateMap<Employee, EmployeeDto>();
         CreateMap<CompanyForCreationDto, Company>();
         CreateMap<EmployeeForCreationDto, Employee>();
         CreateMap<EmployeeForUpdateDto, Employee>().ReverseMap();
         CreateMap<CompanyForUpdateDto, Company>();
+        CreateMap<UserForRegistrationDto, User>();
     }
 }

@@ -4,6 +4,7 @@ using Contracts;
 using Entities.DataTransferObjects;
 using Entities.Models;
 using Marvin.Cache.Headers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.ActionFilters;
 using WebApplication1.ModelBinders;
@@ -34,7 +35,7 @@ public class CompaniesController : ControllerBase
         return Ok();
     }
 
-    [HttpGet(Name = "GetCompanies")]
+    [HttpGet(Name = "GetCompanies"), Authorize(Roles = "Manager")]
     public async Task<IActionResult> GetCompanies()
     {
         //throw new Exception("Exception");
