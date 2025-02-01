@@ -1,15 +1,21 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using AutoMapper;
 using Contracts;
 using Entities.DataTransferObjects;
 using Entities.Models;
+using Marvin.Cache.Headers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.ActionFilters;
 using WebApplication1.ModelBinders;
 
 namespace WebApplication1;
 
-[Route("api/companies")]
+[ApiVersion("1.0")]
+[Route("api/v1/companies")]
 [ApiController]
+[ApiExplorerSettings(GroupName = "v1")]
+/*[ResponseCache(CacheProfileName = "120SecondsDuration")]*/
 public class CompaniesController : ControllerBase
 {
     private readonly ILoggerManager _logger;
@@ -22,8 +28,15 @@ public class CompaniesController : ControllerBase
         _logger = logger;
         _mapper = mapper;
     }
+    
+    [HttpOptions]
+    public IActionResult GetCompaniesOptions()
+    {
+        Response.Headers.Append("Allow", "GET, OPTIONS, POST");
+        return Ok();
+    }
 
-    [HttpGet]
+    [HttpGet(Name = "GetCompanies"), Authorize(Roles = "Manager")]
     public async Task<IActionResult> GetCompanies()
     {
         //throw new Exception("Exception");
@@ -42,6 +55,8 @@ public class CompaniesController : ControllerBase
 
     //TODO: it throws a format error when you don't have the exact number of characters instead of a 404, and doesn't even enter the function
     [HttpGet("{id}", Name = "CompanyById")]
+    [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 60)]
+    [HttpCacheValidation(MustRevalidate = false)]
     public async Task<IActionResult> GetCompany(Guid id)
     {
         Console.WriteLine("[GetCompany] Received request. ");
@@ -57,8 +72,18 @@ public class CompaniesController : ControllerBase
             return Ok(companyDto);
         }
     }
-
-    [HttpPost]
+    /// <summary>
+    /// Creates a newly created company
+    /// </summary>
+    /// <param name="company"></param>
+    /// <returns>A newly created company</returns>
+    /// <response code="201">Returns the newly created item</response>
+    /// <response code="400">If the item is null</response>
+    /// <response code="422">If the model is invalid</response>
+    [HttpPost(Name = "CreateCompany")]
+    [ProducesResponseType(201)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(422)]
     [ServiceFilter<ValidationFilterAttribute>]
     public async Task<IActionResult> CreateCompany([FromBody] CompanyForCreationDto company)
     {

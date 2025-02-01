@@ -1,5 +1,8 @@
+using Asp.Versioning;
+using AspNetCoreRateLimit;
 using Contracts;
 using Entities.DataTransferObjects;
+using Microsoft.AspNetCore.Mvc;
 using NLog;
 using Repository.DataShaping;
 using WebApplication1.ActionFilters;
@@ -18,6 +21,19 @@ LogManager.Setup().LoadConfigurationFromFile(string.Concat(Directory.GetCurrentD
 builder.Services.AddOpenApi();
 builder.Services.ConfigureCors();
 builder.Services.ConfigureLoggerService();
+builder.Services.ConfigureVersioning();
+builder.Services.ConfigureResponseCaching();
+builder.Services.ConfigureHttpCacheHeaders();
+
+builder.Services.AddAuthentication();
+builder.Services.ConfigureIdentity();
+builder.Services.ConfigureJWT(builder.Configuration);
+builder.Services.AddScoped<IAuthenticationManager, AuthenticationManager>();
+
+builder.Services.AddMemoryCache();
+builder.Services.ConfigureRateLimitingOptions();
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.ConfigureSqlContext(builder.Configuration);//Configuration ?
 builder.Services.ConfigureRepositoryManager();
 builder.Services.AddAutoMapper(typeof(Program)); //Startup ?
@@ -26,6 +42,9 @@ builder.Services.AddScoped<ValidateCompanyExistsAttribute>();
 builder.Services.AddScoped<ValidateEmployeeForCompanyExistsAttribute>();
 
 builder.Services.AddScoped<EmployeeLinks>();
+
+builder.Services.ConfigureSwagger();
+
 
 /*
  * Registers the IDataShaper interface with the DataShaper implementation.
@@ -39,6 +58,10 @@ builder.Services.AddControllers(config =>
 {
     config.RespectBrowserAcceptHeader = true;
     config.ReturnHttpNotAcceptable = true;
+    config.CacheProfiles.Add("120SecondsDuration", new CacheProfile
+    {
+        Duration = 120
+    });
 })
     .ConfigureApiBehaviorOptions(options =>
     {
@@ -64,10 +87,22 @@ app.ConfigureExceptionHandler(logger);
 app.UseCors();
 app.UseHttpsRedirection();
 app.MapControllers();
+app.UseResponseCaching();
+app.UseHttpCacheHeaders();
+app.UseIpRateLimiting();
 
-//do we need this?
+//Generally add things to the request pipeline before UseRouting
 app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseSwagger();
+app.UseSwaggerUI(s =>
+{
+    s.SwaggerEndpoint("/swagger/v1/swagger.json", "Djole API v1");
+    s.SwaggerEndpoint("/swagger/v2/swagger.json", "Djole API v2");
+});
+
 //app.UseEndpoints(endpoints => endpoints.MapControllers());
 
 var summaries = new[]
