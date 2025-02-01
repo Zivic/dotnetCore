@@ -43,6 +43,9 @@ builder.Services.AddScoped<ValidateEmployeeForCompanyExistsAttribute>();
 
 builder.Services.AddScoped<EmployeeLinks>();
 
+builder.Services.ConfigureSwagger();
+
+
 /*
  * Registers the IDataShaper interface with the DataShaper implementation.
  * When IDataShaper<EmployeeDto> is requested via dependency injection,
@@ -92,6 +95,14 @@ app.UseIpRateLimiting();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseSwagger();
+app.UseSwaggerUI(s =>
+{
+    s.SwaggerEndpoint("/swagger/v1/swagger.json", "Djole API v1");
+    s.SwaggerEndpoint("/swagger/v2/swagger.json", "Djole API v2");
+});
+
 //app.UseEndpoints(endpoints => endpoints.MapControllers());
 
 var summaries = new[]
